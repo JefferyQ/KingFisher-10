@@ -3,6 +3,7 @@ package org.tkalenko.kingfisher.rest.entity;
 import jdk.nashorn.internal.runtime.regexp.joni.Matcher;
 import jdk.nashorn.internal.runtime.regexp.joni.Regex;
 import org.tkalenko.kingfisher.common.RestException;
+import org.tkalenko.kingfisher.rest.Helper;
 
 import java.util.regex.Pattern;
 
@@ -12,31 +13,43 @@ import java.util.regex.Pattern;
 public class PathOperation {
     private final String path;
     private final boolean withPathParameters;
+    private final Pattern pathPattern;
+
+    private static final Pattern PATH_PATTERN = Pattern.compile("(#)([/]{1}((#)|([\\{]{1}#[\\}]{1})))*".replace("#", Helper.COMMON_PATH_PATTERN));
 
     public PathOperation(final String path) {
         if (path == null)
             throw RestException.missing("path");
-        this.path = path;
-        this.withPathParameters = false;
-        getPath(path);
+        this.path = getPath(Helper.clearPath(path.trim(), '/'));
+        this.withPathParameters = isWithPathParameters(this.path);
+        this.pathPattern = getPathPattern(this.path, this.withPathParameters);
+    }
+
+    private Pattern getPathPattern(final String path, final boolean withPathParameters) {
+        String pattern = String.format("(%1$s)", path);
+        if (withPathParameters) {
+            pattern = pattern.replaceAll("[\\{]{1}#[\\}]{1}".replace("#", Helper.COMMON_PATH_PATTERN), "([^/]*)");
+        }
+        pattern = pattern.concat("([\\?]{1}.*)?");
+        return Pattern.compile(pattern);
+    }
+
+    private boolean isWithPathParameters(final String path) {
+        return path != null ? path.contains("{") : false;
     }
 
     private String getPath(final String path) {
-//        if (!path.matches("[a-zA-Z]{1}[a-zA-Z\\d_]*"))
-//            throw RestException
-//                    .getEx(String
-//                            .format("bad servlet path={%1$s}, example good servlet path's={service,service1,service_1}",
-//                                    path));
-        String pattern = "([a-zA-Z]{1}[a-zA-Z\\d_]*)" + "(" + "[/]{1}" + "(([a-zA-Z]{1}[a-zA-Z\\d_]*)|[\\{]{1}([a-zA-Z]{1}[a-zA-Z\\d_]*)[\\}]{1})" + ")*";
-        Pattern regex = Pattern.compile(pattern);
-        System.out.println(path + " == " + regex.matcher(path).matches());
-        return null;
+        if (!PATH_PATTERN.matcher(path).matches()) {
+            throw RestException
+                    .getEx(String
+                            .format("bad operation path={%1$s}, example good operation path's={operation,operation1,operation2/{some_id}}",
+                                    path));
+        }
+        return path;
     }
 
     public boolean isThisPath(final String path) {
-        //TODO:добавить логику
-        //TODO:немного усложняется так как хочу ввести понятние параметров пути тут, а это вносит некоторую сложность в код
-        return false;
+        return this.pathPattern.matcher(path).matches();
     }
 
     public String getPath() {

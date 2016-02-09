@@ -18,7 +18,7 @@ public class Operation {
         if (serviceId == null)
             throw RestException.missing("serviceId");
         this.id = id.trim();
-        this.path = new PathOperation(path.trim());
+        this.path = new PathOperation(path);
         this.serviceId = serviceId.trim();
         try {
             this.method = HttpMethod.valueOf(method.trim().toUpperCase());
@@ -60,11 +60,17 @@ public class Operation {
         if (this.serviceId.equals(operation.serviceId)) {
             if (this.id.equals(operation.id))
                 return true;
-            if (this.method == operation.method){
+            if (this.method == operation.method) {
                 return isThisOperation(operation.getPath());
             }
         }
         return false;
     }
 
+    @Override
+    public String toString() {
+        return "Operation{" +
+                "id='" + id + '\'' +
+                '}';
+    }
 }

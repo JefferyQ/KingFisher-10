@@ -2,7 +2,9 @@ package org.tkalenko.kingfisher.test;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.regex.Pattern;
 
+import org.tkalenko.kingfisher.common.HttpMethod;
 import org.tkalenko.kingfisher.rest.entity.Operation;
 import org.tkalenko.kingfisher.rest.servlet.Request;
 import org.tkalenko.kingfisher.rest.entity.Service;
@@ -22,8 +24,13 @@ public class Main {
         service.addOperation(new Operation("op1", "op1", "s1", "get"));
         service.addOperation(new Operation("op2", "op1/op_1_1", "s1", "get"));
         service.addOperation(new Operation("op3", "op1/op_1_1/op_1_1", "s1", "get"));
-        service.addOperation(new Operation("op4", "op1/{0}", "s1", "get"));
-        service.addOperation(new Operation("op5", "op1/{0}/as", "s1", "get"));
+        service.addOperation(new Operation("op4", "op1/{id}/aa", "s1", "get"));
+        service.addOperation(new Operation("op5", "op1/{id}/as/{id_1}/", "s1", "get"));
+
+        System.out.println(service.getOperation("op1", HttpMethod.GET));
+        System.out.println(service.getOperation("op2", HttpMethod.GET));
+        System.out.println(service.getOperation("op1/asd/aa", HttpMethod.GET));
+        System.out.println(service.getOperation("op1/asd/as/asdasdasd123123123", HttpMethod.GET));
     }
 
     private static Collection<Request> getRequests() {
