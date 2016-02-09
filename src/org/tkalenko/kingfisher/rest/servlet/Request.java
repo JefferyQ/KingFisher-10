@@ -1,7 +1,8 @@
-package org.tkalenko.kingfisher.rest;
+package org.tkalenko.kingfisher.rest.servlet;
 
 import org.tkalenko.kingfisher.common.HttpMethod;
 import org.tkalenko.kingfisher.common.RestException;
+import org.tkalenko.kingfisher.rest.Helper;
 
 public class Request {
 
@@ -25,4 +26,7 @@ public class Request {
 		return request;
 	}
 
+	public HttpMethod getMethod() {
+		return method;
+	}
 }
