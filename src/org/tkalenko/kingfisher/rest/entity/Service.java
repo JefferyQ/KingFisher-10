@@ -6,13 +6,15 @@ import org.tkalenko.kingfisher.rest.Helper;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 public class Service {
 
     private final String id;
     private final String path;
-    private final Collection<Operation> operations;
+    private final Map<HttpMethod, Collection<Operation>> operations;
 
     private static final Pattern PATH_PATTERN = Pattern.compile(Helper.COMMON_PATH_PATTERN);
 
@@ -25,19 +27,24 @@ public class Service {
         }
         this.id = id.trim();
         this.path = getPath(Helper.clearPath(path.trim(), '/')).concat("/");
-        this.operations = new ArrayList<Operation>();
+        this.operations = new HashMap<HttpMethod, Collection<Operation>>();
     }
 
     public boolean addOperation(final Operation operation) {
         if (operation != null) {
             if (!this.id.equals(operation.getServiceId()))
                 throw RestException.getEx(String.format("operation={%1$s} is not for service={%2$s}", operation, this));
-            for (Operation serviceOperation : this.operations) {
+            Collection<Operation> operations = this.operations.get(operation.getMethod());
+            if (operations == null) {
+                operations = new ArrayList<Operation>();
+                this.operations.put(operation.getMethod(), operations);
+            }
+            for (Operation serviceOperation : operations) {
                 if (operation.equals(serviceOperation)) {
                     throw RestException.getEx(String.format("same operations new_operation={%1$s} and service_operation={%2$s}", operation, serviceOperation));
                 }
             }
-            this.operations.add(operation);
+            operations.add(operation);
             return true;
         }
         return false;
@@ -45,8 +52,11 @@ public class Service {
 
     public Operation getOperation(final String requestPath, HttpMethod method) {
         if (requestPath != null && method != null) {
+            Collection<Operation> operations = this.operations.get(method);
+            if (operations == null)
+                return null;
             String requestPathWithoutService = getPathWithoutService(requestPath);
-            for (Operation operation : this.operations) {
+            for (Operation operation : operations) {
                 if (operation.isThisOperation(requestPathWithoutService))
                     return operation;
             }

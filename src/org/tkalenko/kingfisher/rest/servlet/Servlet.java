@@ -29,17 +29,19 @@ public class Servlet {
         if (request == null) {
             throw RestException.missing("request");
         }
-        final Service service = getService(request.getRequest());
-        final Operation operation = getOperation(request.getRequest(), request.getMethod(), service);
+        final Service service = getService(request.getPath());
+        final Operation operation = getOperation(request.getPath(), request.getMethod(), service);
         return null;
     }
 
     private Operation getOperation(final String requestPath, final HttpMethod method, final Service service) {
         if (requestPath != null && service != null) {
-            return service.getOperation(requestPath, method);
+            Operation operation = service.getOperation(requestPath, method);
+            if (operation != null)
+                return operation;
         }
         throw RestException.getEx(String.format(
-                "can't find operation in service={%2$s} by path={%2$s}", service, requestPath));
+                "can't find operation in service={%1$s} by path={%2$s}", service, requestPath));
     }
 
     private Service getService(final String requestPath) {

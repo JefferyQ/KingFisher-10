@@ -6,27 +6,27 @@ import org.tkalenko.kingfisher.rest.Helper;
 
 public class Request {
 
-	private final HttpMethod method;
-	private final String request;
+    private final HttpMethod method;
+    private final String path;
 
-	public Request(final String method, final String request) {
-		try {
-			this.method = HttpMethod.valueOf(method.trim().toUpperCase());
-		} catch (Throwable e) {
-			throw RestException.getEx(String.format(
-					"unsupported HttpMethod=%1$s", method));
-		}
-		if (request == null) {
-			throw RestException.missing("request");
-		}
-		this.request = Helper.clearPath(request.trim(), '/');
-	}
+    public Request(final String method, final String request) {
+        try {
+            this.method = HttpMethod.valueOf(method.trim().toUpperCase());
+        } catch (Throwable e) {
+            throw RestException.getEx(String.format(
+                    "unsupported HttpMethod=%1$s", method));
+        }
+        if (request == null) {
+            throw RestException.missing("path");
+        }
+        this.path = Helper.clearPath(request.trim(), '/');
+    }
 
-	public String getRequest() {
-		return request;
-	}
+    public String getPath() {
+        return path;
+    }
 
-	public HttpMethod getMethod() {
-		return method;
-	}
+    public HttpMethod getMethod() {
+        return method;
+    }
 }
