@@ -12,15 +12,19 @@ import org.tkalenko.kingfisher.rest.servlet.Servlet;
 
 public class Main {
     public static void main(String[] args) {
-
+        someTest();
         final Servlet servlet = new Servlet(getServices());
         for (Request request : getRequests()) {
             try {
                 servlet.handle(request);
-            } catch (Throwable throwable){
+            } catch (Throwable throwable) {
                 System.out.println(throwable);
             }
         }
+    }
+
+    private static void someTest() {
+        //no-op
     }
 
     private static Collection<Request> getRequests() {
@@ -40,7 +44,7 @@ public class Main {
         service.addOperation(new Operation("op2", "op1/op_1_1", "s1", "get"));
         service.addOperation(new Operation("op3", "op1/op_1_1/op_1_1", "s1", "get"));
         service.addOperation(new Operation("op4", "op1/{id}/aa", "s1", "get"));
-        service.addOperation(new Operation("op5", "op1/{id}/as/{id_1}/", "s1", "get"));
+        service.addOperation(new Operation("op5", "op1/{id}/as/{id_1}", "s1", "get"));
 
         services.add(service);
         return services;

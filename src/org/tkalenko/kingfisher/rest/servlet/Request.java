@@ -16,9 +16,7 @@ public class Request {
             throw RestException.getEx(String.format(
                     "unsupported HttpMethod=%1$s", method));
         }
-        if (request == null) {
-            throw RestException.missing("path");
-        }
+        Helper.validate(request, "request path");
         this.path = Helper.clearPath(request.trim(), '/');
     }
 

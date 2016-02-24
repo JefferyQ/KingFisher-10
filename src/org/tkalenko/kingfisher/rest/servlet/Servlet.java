@@ -5,6 +5,7 @@ import java.util.Collection;
 
 import org.tkalenko.kingfisher.common.HttpMethod;
 import org.tkalenko.kingfisher.common.RestException;
+import org.tkalenko.kingfisher.rest.Helper;
 import org.tkalenko.kingfisher.rest.entity.Operation;
 import org.tkalenko.kingfisher.rest.entity.Service;
 
@@ -26,11 +27,10 @@ public class Servlet {
     }
 
     public Response handle(final Request request) {
-        if (request == null) {
-            throw RestException.missing("request");
-        }
+        Helper.validate(request, "request");
         final Service service = getService(request.getPath());
         final Operation operation = getOperation(request.getPath(), request.getMethod(), service);
+        operation.someTest(request.getPath());
         return null;
     }
 

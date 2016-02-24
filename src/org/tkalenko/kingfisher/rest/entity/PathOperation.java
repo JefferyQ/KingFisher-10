@@ -20,56 +20,75 @@ public class PathOperation {
     private static final Pattern PATH_PARAMETERS_PATTERN = Pattern.compile("([\\{]{1}#[\\}]{1})".replace("#", Helper.COMMON_PATH_PATTERN));
 
     public PathOperation(final String path) {
-        if (path == null)
-            throw RestException.missing("path");
+        Helper.validate(path, "path");
         this.path = getPath(Helper.clearPath(path.trim(), '/'));
-        this.withPathParameters = isWithPathParameters(this.path);
-        this.pathParameters = getPathParameters(this.path, this.withPathParameters);
-        this.pathPattern = getPathPattern(this.path, this.withPathParameters);
+        this.withPathParameters = isWithPathParameters();
+        this.pathParameters = getPathParameters();
+        this.pathPattern = getPathPattern();
     }
 
-    private Map<String, String> getPathParameters(final String requestPath) {
-        if (requestPath == null)
-            throw RestException.missing("request path");
-        if (this.withPathParameters) {
-            //TODO: подумать как это можно сдлеать
+    private boolean isWithPathParameters() {
+        return isWithPathParameters(this.path);
+    }
+
+    private Collection<String> getPathParameters() {
+        return getPathParameters(this.path, this.withPathParameters);
+    }
+
+    private Pattern getPathPattern() {
+        return getPathPattern(this.path, this.withPathParameters, this.pathParameters);
+    }
+
+    public Map<String, String> getPathParameters(final String requestPath) {
+        Helper.validate(requestPath, "request path");
+        if (!this.withPathParameters)
+            return null;
+        Matcher matcher = this.pathPattern.matcher(requestPath);
+        Map<String, String> res = new LinkedHashMap<String, String>();
+        matcher.find();
+        int i = 1;
+        for (Iterator<String> iterator = this.pathParameters.iterator(); iterator.hasNext(); ) {
+            String parameter = iterator.next();
+            res.put(parameter, matcher.group(++i));
         }
-        return null;
+        return res;
+    }
+
+    public Map<String, String> getGetParameters(final String requestPath) {
+        Map<String, String> res = new HashMap<String, String>();
+        System.out.println(requestPath.substring(requestPath.indexOf('?', requestPath.length() - 1)));
+        return res;
     }
 
     private Collection<String> getPathParameters(final String path, final boolean withPathParameters) {
-        if (withPathParameters) {
-            Collection<String> pathParameters = new ArrayList<String>();
-            Matcher matcher = PATH_PARAMETERS_PATTERN.matcher(path);
-            while (matcher.find()) {
-                String parameter = matcher.group();
-                if (pathParameters.contains(parameter))
-                    throw RestException.getEx(String.format("in operation={%1$s} already exist path parameter={%2$s}", this, parameter));
-                pathParameters.add(parameter);
+        if (!withPathParameters)
+            return null;
+        Collection<String> parameters = new ArrayList<String>();
+        StringBuilder builder = new StringBuilder(path);
+        for (int i = 0; i < builder.length(); i++) {
+            char c = builder.charAt(i);
+            if (c == '{') {
+                for (int j = ++i; j < builder.length(); j++) {
+                    char ci = builder.charAt(j);
+                    if (ci == '}') {
+                        String parameter = builder.substring(i, j);
+                        if (parameters.contains(parameter))
+                            throw RestException.getEx(String.format("path_parameter=%1$s already exist in path=%2$s", path, parameter));
+                        parameters.add(parameter);
+                        i = j;
+                        break;
+                    }
+                }
             }
-            return pathParameters;
         }
-        return null;
+        return parameters;
     }
 
-    private Pattern getPathPattern(final String path, final boolean withPathParameters) {
+    private Pattern getPathPattern(final String path, final boolean withPathParameters, final Collection<String> pathParameters) {
         String pattern = String.format("(%1$s)", path);
         if (withPathParameters) {
-            pattern = pattern.replaceAll("[\\{]{1}#[\\}]{1}".replace("#", Helper.COMMON_PATH_PATTERN), "([^/]*)");
-            if (true) {
-                //TODO: подумать об этом позже
-                String p = String.format("(%1$s)", path);
-                Matcher matcher = PATH_PARAMETERS_PATTERN.matcher(path);
-                while (matcher.find()) {
-                    String parameter = matcher.group();
-                    matcher.replaceFirst("TEST=" + parameter);
-                    System.out.println(matcher);
-                }
-                StringBuilder builder = null;
-//                for (String pathParameter : this.pathParameters) {
-//                    p = p.replaceFirst("[\\{]{1}#[\\}]{1}".replace("#", Helper.COMMON_PATH_PATTERN), String.format("(?<%1$s>[^/]*)", pathParameter));
-//                }
-                System.out.println(p);
+            for (String pathParameter : pathParameters) {
+                pattern = pattern.replace(String.format("{%s}", pathParameter), "(?:([^/]*))");
             }
         }
         pattern = pattern.concat("([\\?]{1}.*)?");

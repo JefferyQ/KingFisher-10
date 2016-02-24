@@ -2,6 +2,7 @@ package org.tkalenko.kingfisher.rest.entity;
 
 import org.tkalenko.kingfisher.common.HttpMethod;
 import org.tkalenko.kingfisher.common.RestException;
+import org.tkalenko.kingfisher.rest.Helper;
 
 public class Operation {
 
@@ -11,12 +12,9 @@ public class Operation {
     private final HttpMethod method;
 
     public Operation(final String id, final String path, final String serviceId, final String method) {
-        if (id == null)
-            throw RestException.missing("id");
-        if (path == null)
-            throw RestException.missing("path");
-        if (serviceId == null)
-            throw RestException.missing("serviceId");
+        Helper.validate(id, "id");
+        Helper.validate(id, "path");
+        Helper.validate(id, "serviceId");
         this.id = id.trim();
         this.path = new PathOperation(path);
         this.serviceId = serviceId.trim();
@@ -26,6 +24,14 @@ public class Operation {
             throw RestException.getEx(String.format(
                     "unsupported HttpMethod=%1$s", method));
         }
+    }
+
+    public void someTest(final String requestPath) {
+        // TODO: 24.02.2016 Сделать получение параметров запросов и гет параметров
+        System.out.println(requestPath);
+        System.out.println(this.path.getPathParameters(requestPath));
+        if (this.method == HttpMethod.GET)
+            System.out.println(this.path.getGetParameters(requestPath));
     }
 
     public boolean isThisOperation(final String path) {

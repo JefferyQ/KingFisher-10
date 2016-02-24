@@ -1,5 +1,7 @@
 package org.tkalenko.kingfisher.rest;
 
+import org.tkalenko.kingfisher.common.RestException;
+
 public final class Helper {
 
     public static final String COMMON_PATH_PATTERN = "[a-zA-Z]{1}[a-zA-Z\\d_]*";
@@ -13,5 +15,12 @@ public final class Helper {
             builder.deleteCharAt(builder.length() - 1);
         }
         return builder.toString();
+    }
+
+    public static void validate(final Object o, final String name) {
+        if (name == null)
+            throw RestException.missing("name of object");
+        if (o == null)
+            throw RestException.missing(name);
     }
 }

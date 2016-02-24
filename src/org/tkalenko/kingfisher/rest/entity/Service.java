@@ -19,12 +19,8 @@ public class Service {
     private static final Pattern PATH_PATTERN = Pattern.compile(Helper.COMMON_PATH_PATTERN);
 
     public Service(final String id, final String path) {
-        if (id == null) {
-            throw RestException.missing("id");
-        }
-        if (path == null) {
-            throw RestException.missing("path");
-        }
+        Helper.validate(id, "id");
+        Helper.validate(path, "path");
         this.id = id.trim();
         this.path = getPath(Helper.clearPath(path.trim(), '/')).concat("/");
         this.operations = new HashMap<HttpMethod, Collection<Operation>>();
@@ -40,7 +36,8 @@ public class Service {
                 this.operations.put(operation.getMethod(), operations);
             }
             for (Operation serviceOperation : operations) {
-                if (operation.equals(serviceOperation)) {
+//                if (operation.equals(serviceOperation)) {
+                if (serviceOperation.equals(operation)) {
                     throw RestException.getEx(String.format("same operations new_operation={%1$s} and service_operation={%2$s}", operation, serviceOperation));
                 }
             }
