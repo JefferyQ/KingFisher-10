@@ -8,8 +8,9 @@ public class Request {
 
     private final HttpMethod method;
     private final String path;
+    private final String body;
 
-    public Request(final String method, final String request) {
+    public Request(final String method, final String request, final String body) {
         try {
             this.method = HttpMethod.valueOf(method.trim().toUpperCase());
         } catch (Throwable e) {
@@ -18,13 +19,18 @@ public class Request {
         }
         Helper.validate(request, "request path");
         this.path = Helper.clearPath(request.trim(), '/');
+        this.body = body;
     }
 
     public String getPath() {
-        return path;
+        return this.path;
     }
 
     public HttpMethod getMethod() {
-        return method;
+        return this.method;
+    }
+
+    public String getBody() {
+        return this.body;
     }
 }

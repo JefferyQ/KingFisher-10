@@ -1,8 +1,12 @@
-package org.tkalenko.kingfisher.rest.entity;
+package org.tkalenko.kingfisher.rest.entity.operation;
 
 import org.tkalenko.kingfisher.common.HttpMethod;
 import org.tkalenko.kingfisher.common.RestException;
 import org.tkalenko.kingfisher.rest.Helper;
+import org.tkalenko.kingfisher.rest.entity.RestEntity;
+
+import java.util.Collection;
+import java.util.Map;
 
 public class Operation {
 
@@ -10,8 +14,11 @@ public class Operation {
     private final PathOperation path;
     private final String serviceId;
     private final HttpMethod method;
+    private final Description pathParametersDescription;
+    private final Description parametersDescription;
+    //как обрабатывать корректно
 
-    public Operation(final String id, final String path, final String serviceId, final String method) {
+    public Operation(final String id, final String path, final String serviceId, final String method, final RestEntity pathParametersDescription, final Description parametersDescription) {
         Helper.validate(id, "id");
         Helper.validate(id, "path");
         Helper.validate(id, "serviceId");
@@ -24,14 +31,22 @@ public class Operation {
             throw RestException.getEx(String.format(
                     "unsupported HttpMethod=%1$s", method));
         }
+        if (this.path.isWithPathParameters()) {
+            if (pathParametersDescription == null)
+                RestException.missing(String.format("path paremeters description for operation=%s", this.id));
+            this.pathParametersDescription = new PathParametersDescription(pathParametersDescription);
+        } else {
+            this.pathParametersDescription = null;
+        }
+        this.parametersDescription = parametersDescription;
     }
 
-    public void someTest(final String requestPath) {
-        // TODO: 24.02.2016 Сделать получение параметров запросов и гет параметров
-        System.out.println(requestPath);
-        System.out.println(this.path.getPathParameters(requestPath));
-        if (this.method == HttpMethod.GET)
-            System.out.println(this.path.getGetParameters(requestPath));
+    public Map<String, String> getPathParameters(final String requestPath) {
+        return this.path.getPathParameters(requestPath);
+    }
+
+    public Collection<GetParameter> getGetParameters(final String requestPath){
+        return this.path.getGetParameters(requestPath);
     }
 
     public boolean isThisOperation(final String path) {
@@ -55,7 +70,15 @@ public class Operation {
     }
 
     public String getId() {
-        return id;
+        return this.id;
+    }
+
+    public Description getPathParametersDescription() {
+        return this.pathParametersDescription;
+    }
+
+    public Description getParametersDescription() {
+        return this.parametersDescription;
     }
 
     @Override

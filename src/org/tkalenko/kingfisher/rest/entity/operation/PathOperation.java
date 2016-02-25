@@ -1,4 +1,4 @@
-package org.tkalenko.kingfisher.rest.entity;
+package org.tkalenko.kingfisher.rest.entity.operation;
 
 import org.tkalenko.kingfisher.common.RestException;
 import org.tkalenko.kingfisher.rest.Helper;
@@ -22,13 +22,13 @@ public class PathOperation {
     public PathOperation(final String path) {
         Helper.validate(path, "path");
         this.path = getPath(Helper.clearPath(path.trim(), '/'));
-        this.withPathParameters = isWithPathParameters();
+        this.withPathParameters = isHasPathParameters();
         this.pathParameters = getPathParameters();
         this.pathPattern = getPathPattern();
     }
 
-    private boolean isWithPathParameters() {
-        return isWithPathParameters(this.path);
+    private boolean isHasPathParameters() {
+        return isHasPathParameters(this.path);
     }
 
     private Collection<String> getPathParameters() {
@@ -54,9 +54,17 @@ public class PathOperation {
         return res;
     }
 
-    public Map<String, String> getGetParameters(final String requestPath) {
-        Map<String, String> res = new HashMap<String, String>();
-        System.out.println(requestPath.substring(requestPath.indexOf('?', requestPath.length() - 1)));
+    public Collection<GetParameter> getGetParameters(final String requestPath) {
+        Helper.validate(requestPath, "request path");
+        int startGetRequest = requestPath.indexOf('?');
+        if (startGetRequest < 0)
+            return null;
+        Collection<GetParameter> res = new ArrayList<GetParameter>();
+        String[] parameters = requestPath.substring(startGetRequest + 1, requestPath.length()).split("&");
+        for (String parameter : parameters) {
+            String[] params = parameter.split("=");
+            res.add(new GetParameter(params[0], params[1]));
+        }
         return res;
     }
 
@@ -95,7 +103,7 @@ public class PathOperation {
         return Pattern.compile(pattern);
     }
 
-    private boolean isWithPathParameters(final String path) {
+    private boolean isHasPathParameters(final String path) {
         return path != null ? path.contains("{") : false;
     }
 
@@ -115,5 +123,9 @@ public class PathOperation {
 
     public String getPath() {
         return this.path;
+    }
+
+    public boolean isWithPathParameters() {
+        return this.withPathParameters;
     }
 }

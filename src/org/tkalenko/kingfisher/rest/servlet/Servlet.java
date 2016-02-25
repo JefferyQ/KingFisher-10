@@ -6,8 +6,10 @@ import java.util.Collection;
 import org.tkalenko.kingfisher.common.HttpMethod;
 import org.tkalenko.kingfisher.common.RestException;
 import org.tkalenko.kingfisher.rest.Helper;
-import org.tkalenko.kingfisher.rest.entity.Operation;
-import org.tkalenko.kingfisher.rest.entity.Service;
+import org.tkalenko.kingfisher.rest.entity.RestEntity;
+import org.tkalenko.kingfisher.rest.entity.operation.Operation;
+import org.tkalenko.kingfisher.rest.entity.service.Parameters;
+import org.tkalenko.kingfisher.rest.entity.service.Service;
 
 public class Servlet {
 
@@ -26,11 +28,12 @@ public class Servlet {
         }
     }
 
-    public Response handle(final Request request) {
+    public Response handle(final Request request) throws Exception {
         Helper.validate(request, "request");
         final Service service = getService(request.getPath());
         final Operation operation = getOperation(request.getPath(), request.getMethod(), service);
-        operation.someTest(request.getPath());
+        final Parameters parameters = service.getParameters(operation, request.getPath(), request.getBody());
+        final RestEntity result = service.handle(parameters);
         return null;
     }
 

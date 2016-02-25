@@ -1,8 +1,10 @@
-package org.tkalenko.kingfisher.rest.entity;
+package org.tkalenko.kingfisher.rest.entity.service;
 
 import org.tkalenko.kingfisher.common.HttpMethod;
 import org.tkalenko.kingfisher.common.RestException;
 import org.tkalenko.kingfisher.rest.Helper;
+import org.tkalenko.kingfisher.rest.entity.RestEntity;
+import org.tkalenko.kingfisher.rest.entity.operation.Operation;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -15,15 +17,42 @@ public class Service {
     private final String id;
     private final String path;
     private final Map<HttpMethod, Collection<Operation>> operations;
+    private final Marshaller marshaller;
+    private final Handler handler;
 
     private static final Pattern PATH_PATTERN = Pattern.compile(Helper.COMMON_PATH_PATTERN);
 
-    public Service(final String id, final String path) {
+    public Service(final String id, final String path, final Marshaller marshaller, final Handler handler) {
         Helper.validate(id, "id");
         Helper.validate(path, "path");
+        Helper.validate(marshaller, "marshaller");
+        Helper.validate(handler, "handler");
         this.id = id.trim();
         this.path = getPath(Helper.clearPath(path.trim(), '/')).concat("/");
         this.operations = new HashMap<HttpMethod, Collection<Operation>>();
+        this.marshaller = marshaller;
+        this.handler = handler;
+    }
+
+    public Parameters getParameters(final Operation operation, final String requestPath, final String requestBody) throws IllegalAccessException, InstantiationException {
+        Helper.validate(operation, "service operation");
+        Parameters parameters = new Parameters();
+        if (operation.getPathParametersDescription() != null) {
+            parameters.setPathParameters(this.marshaller.marshall(operation.getPathParameters(requestPath), operation.getPathParametersDescription().getEntity().getClass()));
+        }
+        if (operation.getParametersDescription() != null) {
+            Class<? extends RestEntity> clazz = operation.getParametersDescription().getEntity().getClass();
+            RestEntity parametersEntity = operation.getMethod() == HttpMethod.GET ? this.marshaller.marshall(operation.getGetParameters(requestPath), clazz) : null;
+            if (parametersEntity == null && !operation.getParametersDescription().isOption())
+                RestException.getEx("empty parameters");
+            parameters.setParameters(parametersEntity);
+        }
+        return parameters;
+    }
+
+    public RestEntity handle(final Parameters parameters) throws Exception {
+        Helper.validate(parameters, "parameters");
+        return this.handler.handle(parameters);
     }
 
     public boolean addOperation(final Operation operation) {
@@ -36,7 +65,6 @@ public class Service {
                 this.operations.put(operation.getMethod(), operations);
             }
             for (Operation serviceOperation : operations) {
-//                if (operation.equals(serviceOperation)) {
                 if (serviceOperation.equals(operation)) {
                     throw RestException.getEx(String.format("same operations new_operation={%1$s} and service_operation={%2$s}", operation, serviceOperation));
                 }
