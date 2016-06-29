@@ -1,6 +1,7 @@
 package org.kingfisher.common.model;
 
 // TODO: 28.06.2016 добавить полное описание
+// TODO: 29.06.2016 почитать про фабрики, и сделать опитимальнее без рефлексии
 public class Header {
     protected String name;
     protected String value;

@@ -3,6 +3,7 @@ package org.kingfisher.common.model;
 import java.util.Date;
 
 // TODO: 28.06.2016 добавить полное описание
+// TODO: 29.06.2016 почитать про фабрики, и сделать опитимальнее без рефлексии
 public class Cookie {
     private String name;
     private String value;
