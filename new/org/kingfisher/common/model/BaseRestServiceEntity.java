@@ -17,6 +17,14 @@ public class BaseRestServiceEntity {
         this.id = id;
     }
 
+    public String getUrl() {
+        return this.url;
+    }
+
+    public void setUrl(final String url) {
+        this.url = url;
+    }
+
     @Override
     public String toString() {
         return String.format(
