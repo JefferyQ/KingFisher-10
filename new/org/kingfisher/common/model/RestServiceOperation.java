@@ -8,6 +8,7 @@ public class RestServiceOperation extends BaseRestServiceEntity {
     private BodyEntity paremeters;
     private BodyEntity result;
     private BodyEntity entity;
+    private String handler;
 
     public RestServiceOperation() {
     }
@@ -52,10 +53,18 @@ public class RestServiceOperation extends BaseRestServiceEntity {
         this.entity = entity;
     }
 
+    public String getHandler() {
+        return this.handler;
+    }
+
+    public void setHandler(final String handler) {
+        this.handler = handler;
+    }
+
     @Override
     public String toString() {
         return String.format(
-                "%s{id=%s, url=%s, method=%s, serviceId=%s, paremeters=%s, result=%s, entity=%s}",
+                "%s{id=%s, url=%s, method=%s, serviceId=%s, paremeters=%s, result=%s, entity=%s, handler=%s}",
                 this.getClass().getName(),
                 this.id,
                 this.url,
@@ -63,7 +72,8 @@ public class RestServiceOperation extends BaseRestServiceEntity {
                 this.serviceId,
                 this.paremeters,
                 this.result,
-                this.entity
+                this.entity,
+                this.handler
         );
     }
 }

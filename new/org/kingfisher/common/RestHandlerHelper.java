@@ -10,6 +10,10 @@ public final class RestHandlerHelper {
     private static final String SPLIT_URL_REGEX = String.format("(?=%s)", BASE_URL_REGEX);
     private static final Pattern URL_PATTERN = Pattern.compile(String.format("(%s)+", BASE_URL_REGEX));
 
+    public static final String PARAMETERS_BODY_ENTITY_TYPE = "parameters";
+    public static final String ENTITY_BODY_ENTITY_TYPE = "entity";
+    public static final String RESULT_BODY_ENTITY_TYPE = "result";
+
     public static String clearUrl(final String baseUrl, final String clearUrl) {
         return StringUtils.remove(baseUrl, clearUrl);
     }

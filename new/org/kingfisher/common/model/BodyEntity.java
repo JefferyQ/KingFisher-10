@@ -3,7 +3,7 @@ package org.kingfisher.common.model;
 // TODO: 30.06.2016 добавить полное описание
 public class BodyEntity {
     private Class<?> clazz;
-    private boolean required;
+    private boolean required = true;
 
     public BodyEntity() {
     }

@@ -1,6 +1,7 @@
 package org.kingfisher.common.model;
 
 import org.kingfisher.common.intf.BodyHandlerInterface;
+import org.kingfisher.common.intf.RestServiceOperationHandler;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,6 +11,7 @@ import java.util.Map;
 public class RestService extends BaseRestServiceEntity {
     private final Map<RestServiceOperationKey, RestServiceOperation> operations = new HashMap<RestServiceOperationKey, RestServiceOperation>();
     private BodyHandlerInterface bodyHandler;
+    private RestServiceOperationHandler operationHandler;
 
     public RestService() {
     }
@@ -26,15 +28,24 @@ public class RestService extends BaseRestServiceEntity {
         this.bodyHandler = bodyHandler;
     }
 
+    public RestServiceOperationHandler getOperationHandler() {
+        return this.operationHandler;
+    }
+
+    public void setOperationHandler(final RestServiceOperationHandler operationHandler) {
+        this.operationHandler = operationHandler;
+    }
+
     @Override
     public String toString() {
         return String.format(
-                "%s{id=%s, url=%s, operations=%s, bodyHandler=%s}",
+                "%s{id=%s, url=%s, operations=%s, bodyHandler=%s, operationHandler=%s}",
                 this.getClass().getName(),
                 this.id,
                 this.url,
                 this.operations,
-                this.bodyHandler
+                this.bodyHandler,
+                this.operationHandler
         );
     }
 }

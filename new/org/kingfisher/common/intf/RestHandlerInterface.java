@@ -19,5 +19,9 @@ public interface RestHandlerInterface<T> {
 
     RestServiceOperation getOperation(final RestService service, final String url, final String method, final MessageContext<T> requestCtx) throws RestHandlerException;
 
-    MessageContext createBodyCtx(final RestService service, final RestServiceOperation operation, final MessageContext<T> requestCtx) throws RestHandlerException;
+    MessageContext createParamsCtx(final RestService service, final RestServiceOperation operation, final MessageContext<T> requestCtx) throws RestHandlerException;
+
+    MessageContext handleOperation(final RestService service, final RestServiceOperation operation, final MessageContext paramsCtx) throws RestHandlerException;
+
+    MessageContext<T> createResponseCtx(final RestService service, final RestServiceOperation operation, final MessageContext resultCtx) throws RestHandlerException;
 }
