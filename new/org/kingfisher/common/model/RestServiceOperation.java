@@ -9,6 +9,8 @@ public class RestServiceOperation extends BaseRestServiceEntity {
     private BodyEntity result;
     private BodyEntity entity;
     private String handler;
+    private String validator;
+    private boolean auth = true;
 
     public RestServiceOperation() {
     }
@@ -61,19 +63,30 @@ public class RestServiceOperation extends BaseRestServiceEntity {
         this.handler = handler;
     }
 
+    public boolean isAuth() {
+        return this.auth;
+    }
+
+    public void setAuth(final boolean auth) {
+        this.auth = auth;
+    }
+
+    public String getValidator() {
+        return this.validator;
+    }
+
+    public void setValidator(final String validator) {
+        this.validator = validator;
+    }
+
     @Override
     public String toString() {
         return String.format(
-                "%s{id=%s, url=%s, method=%s, serviceId=%s, paremeters=%s, result=%s, entity=%s, handler=%s}",
-                this.getClass().getName(),
+                "RestServiceOperation{serviceId=%s, id=%s, url=%s, method=%s}",
+                this.serviceId,
                 this.id,
                 this.url,
-                this.method,
-                this.serviceId,
-                this.paremeters,
-                this.result,
-                this.entity,
-                this.handler
+                this.method
         );
     }
 }

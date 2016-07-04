@@ -43,8 +43,7 @@ public class RestServiceOperationKey {
     @Override
     public String toString() {
         return String.format(
-                "%s{method=%s, url=%s}",
-                this.getClass().getName(),
+                "RestServiceOperationKey{%s, url=%s}",
                 this.method,
                 this.url
         );

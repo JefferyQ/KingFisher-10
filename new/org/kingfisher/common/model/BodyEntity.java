@@ -27,8 +27,7 @@ public class BodyEntity {
     @Override
     public String toString() {
         return String.format(
-                "%s{clazz=%s, required=%s}",
-                this.getClass().getName(),
+                "BodyEntity{clazz=%s, required=%s}",
                 this.clazz,
                 this.required
         );

@@ -1,31 +1,65 @@
 package org.kingfisher.common;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.kingfisher.common.intf.RestHandlerInterface;
+import org.kingfisher.common.intf.RestInterceptorInterface;
 import org.kingfisher.common.model.*;
 
 import java.util.HashMap;
+import java.util.ListIterator;
 import java.util.Map;
 
 // TODO: 29.06.2016 добавить полное описание
-// TODO: 29.06.2016 подумать о возможных методах
-// TODO: 29.06.2016 подумать о логике в целом
-// TODO: 03.07.2016 протестировать первую часть
 public class RestHandler<T> implements RestHandlerInterface<T> {
     private Map<String, RestService> services = new HashMap<String, RestService>();
 
     @Override
-    public MessageContext<T> handle(final String url, final String method, final MessageContext<T> requestCtx) throws RestHandlerException {
+    public RestMessageContext<T> handle(final String url, final String method, final RestMessageContext<T> requestCtx) throws RestHandlerException {
         final RestService service = getService(url, method, requestCtx);
         final RestServiceOperation operation = getOperation(service, url, method, requestCtx);
-        final MessageContext paramsCtx = createParamsCtx(service, operation, requestCtx);
-        final MessageContext resultCtx = handleOperation(service, operation, paramsCtx);
+        final RestMessageContext paramsCtx = createParamsCtx(service, operation, requestCtx);
+        final Map<String, Object> data = new HashMap<String, Object>();
+
+        RestMessageContext resultCtx = null;
+        interceptorsBefore(service, operation, paramsCtx, data);
+        try {
+            if (StringUtils.endsWith(url, RestHandlerHelper.VALIDATE_URL)) {
+                if (StringUtils.isEmpty(operation.getValidator()))
+                    throw new RestHandlerException(String.format("%s don't contain validator", operation));
+                validateOperation(service, operation, paramsCtx, data);
+            } else {
+                validateOperation(service, operation, paramsCtx, data);
+                resultCtx = handleOperation(service, operation, paramsCtx, data);
+            }
+        } catch (final RestValidationException e) {
+            interceptorsAfter(service, operation, paramsCtx, data);
+            return createResponseValidateCtx(service, operation, paramsCtx);
+        }
+        interceptorsAfter(service, operation, resultCtx, data);
+
         return createResponseCtx(service, operation, resultCtx);
     }
 
     @Override
-    public MessageContext<T> createResponseCtx(final RestService service, final RestServiceOperation operation, final MessageContext resultCtx) throws RestHandlerException {
+    public RestMessageContext<T> createResponseValidateCtx(final RestService service, final RestServiceOperation operation, final RestMessageContext paramsCtx) throws RestHandlerException {
+        Pair<BodyEntity, String> pair = getParamsEntity(operation);
+        RestMessageContext<T> res = new RestMessageContext<T>();
+        res.getCookies().addAll(paramsCtx.getCookies());
+        res.getCookies().addAll(paramsCtx.getHeaders());
+        res.setBody((T) service.getBodyHandler().unmarshalValidation(pair.getLeft().getClazz(), pair.getRight(), paramsCtx));
+        return res;
+    }
+
+    @Override
+    public void validateOperation(final RestService service, final RestServiceOperation operation, final RestMessageContext paramsCtx, final Map<String, Object> data) throws RestValidationException {
+        if (paramsCtx.getBody() == null || StringUtils.isEmpty(operation.getValidator()))
+            return;
+        service.getOperationHandler().validate(operation.getValidator(), paramsCtx, data);
+    }
+
+    @Override
+    public RestMessageContext<T> createResponseCtx(final RestService service, final RestServiceOperation operation, final RestMessageContext resultCtx) throws RestHandlerException {
         BodyEntity response = null;
         String type = null;
         if (operation.getResult() != null) {
@@ -39,7 +73,7 @@ public class RestHandler<T> implements RestHandlerInterface<T> {
             if (response != null && response.isRequired())
                 throw new IllegalArgumentException(String.format("%s required result", operation));
         }
-        MessageContext<T> res = new MessageContext<T>();
+        RestMessageContext<T> res = new RestMessageContext<T>();
         res.getCookies().addAll(resultCtx.getCookies());
         res.getHeaders().addAll(resultCtx.getHeaders());
         if (response != null && resultCtx != null)
@@ -48,12 +82,25 @@ public class RestHandler<T> implements RestHandlerInterface<T> {
     }
 
     @Override
-    public MessageContext handleOperation(final RestService service, final RestServiceOperation operation, final MessageContext paramsCtx) throws RestHandlerException {
-        return service.getOperationHandler().handle(operation.getHandler(), paramsCtx);
+    public void interceptorsAfter(final RestService service, final RestServiceOperation operation, final RestMessageContext paramsCtx, final Map<String, Object> data) throws RestHandlerException {
+        for (ListIterator<RestInterceptorInterface> iterator = service.getInterceptors().listIterator(service.getInterceptors().size()); iterator.hasPrevious(); ) {
+            iterator.next().after(paramsCtx, data);
+        }
     }
 
     @Override
-    public MessageContext createParamsCtx(final RestService service, final RestServiceOperation operation, final MessageContext<T> requestCtx) throws RestHandlerException {
+    public RestMessageContext handleOperation(final RestService service, final RestServiceOperation operation, final RestMessageContext paramsCtx, final Map<String, Object> data) throws RestHandlerException {
+        return service.getOperationHandler().handle(operation.getHandler(), paramsCtx, data);
+    }
+
+    @Override
+    public void interceptorsBefore(final RestService service, final RestServiceOperation operation, final RestMessageContext paramsCtx, final Map<String, Object> data) throws RestHandlerException {
+        for (ListIterator<RestInterceptorInterface> iterator = service.getInterceptors().listIterator(); iterator.hasNext(); ) {
+            iterator.next().before(paramsCtx, data);
+        }
+    }
+
+    public Pair<BodyEntity, String> getParamsEntity(final RestServiceOperation operation) {
         BodyEntity params = null;
         String type = null;
         if (operation.getParemeters() != null) {
@@ -63,11 +110,19 @@ public class RestHandler<T> implements RestHandlerInterface<T> {
             params = operation.getEntity();
             type = RestHandlerHelper.ENTITY_BODY_ENTITY_TYPE;
         }
+        return Pair.of(params, type);
+    }
+
+    @Override
+    public RestMessageContext createParamsCtx(final RestService service, final RestServiceOperation operation, final RestMessageContext<T> requestCtx) throws RestHandlerException {
+        Pair<BodyEntity, String> pair = getParamsEntity(operation);
+        BodyEntity params = pair.getLeft();
+        String type = pair.getRight();
         if (requestCtx.getBody() == null) {
             if (params != null && params.isRequired())
                 throw new IllegalArgumentException(String.format("%s required request", operation));
         }
-        MessageContext res = new MessageContext();
+        RestMessageContext res = new RestMessageContext();
         res.getCookies().addAll(requestCtx.getCookies());
         res.getHeaders().addAll(requestCtx.getHeaders());
         if (params != null && requestCtx.getBody() != null)
@@ -137,7 +192,7 @@ public class RestHandler<T> implements RestHandlerInterface<T> {
     }
 
     @Override
-    public RestService getService(final String url, final String method, final MessageContext<T> requestCtx) throws RestHandlerException {
+    public RestService getService(final String url, final String method, final RestMessageContext<T> requestCtx) throws RestHandlerException {
         RestService res;
         for (String chainUrl : RestHandlerHelper.getChainUrls(url)) {
             res = this.services.get(chainUrl);
@@ -148,10 +203,10 @@ public class RestHandler<T> implements RestHandlerInterface<T> {
     }
 
     @Override
-    public RestServiceOperation getOperation(final RestService service, final String url, final String method, final MessageContext<T> requestCtx) throws RestHandlerException {
+    public RestServiceOperation getOperation(final RestService service, final String url, final String method, final RestMessageContext<T> requestCtx) throws RestHandlerException {
         RestServiceOperationKey key = new RestServiceOperationKey();
         key.setMethod(method);
-        key.setUrl(RestHandlerHelper.clearUrl(url, service.getUrl()));
+        key.setUrl(RestHandlerHelper.clearEndOfUrl(RestHandlerHelper.clearStartOfUrl(url, service.getUrl()), RestHandlerHelper.VALIDATE_URL));
         RestServiceOperation res = service.getOperations().get(key);
         if (res == null)
             throw new RestHandlerException(String.format("can't find operation in %s by url=%s and method=%s", service, url, method));

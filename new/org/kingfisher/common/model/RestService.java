@@ -1,9 +1,12 @@
 package org.kingfisher.common.model;
 
 import org.kingfisher.common.intf.BodyHandlerInterface;
+import org.kingfisher.common.intf.RestInterceptorInterface;
 import org.kingfisher.common.intf.RestServiceOperationHandler;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 // TODO: 29.06.2016 добавить логику и полное описание
@@ -12,6 +15,7 @@ public class RestService extends BaseRestServiceEntity {
     private final Map<RestServiceOperationKey, RestServiceOperation> operations = new HashMap<RestServiceOperationKey, RestServiceOperation>();
     private BodyHandlerInterface bodyHandler;
     private RestServiceOperationHandler operationHandler;
+    private final List<RestInterceptorInterface> interceptors = new ArrayList<RestInterceptorInterface>();
 
     public RestService() {
     }
@@ -36,16 +40,16 @@ public class RestService extends BaseRestServiceEntity {
         this.operationHandler = operationHandler;
     }
 
+    public List<RestInterceptorInterface> getInterceptors() {
+        return this.interceptors;
+    }
+
     @Override
     public String toString() {
         return String.format(
-                "%s{id=%s, url=%s, operations=%s, bodyHandler=%s, operationHandler=%s}",
-                this.getClass().getName(),
+                "RestService{id=%s, url=%s}",
                 this.id,
-                this.url,
-                this.operations,
-                this.bodyHandler,
-                this.operationHandler
+                this.url
         );
     }
 }

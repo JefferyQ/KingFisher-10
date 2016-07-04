@@ -4,12 +4,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 // TODO: 28.06.2016 добавить полное описание
-public class MessageContext<T> {
+public class RestMessageContext<T> {
     private T body;
     private final Collection<Header> headers = new ArrayList<Header>();
     private final Collection<Cookie> cookies = new ArrayList<Cookie>();
 
-    public MessageContext() {
+    public RestMessageContext() {
     }
 
     public T getBody() {
@@ -30,17 +30,11 @@ public class MessageContext<T> {
 
     @Override
     public String toString() {
-        String.format(
-                "%s{body=%s, headers=%s, cookies=%s}",
-                this.getClass().getName(),
+        return String.format(
+                "RestMessageContext{body=%s, headers=%s, cookies=%s}",
                 this.body,
                 this.headers,
                 this.cookies
         );
-        return "MessageContext{" +
-                "body=" + body +
-                ", headers=" + headers +
-                ", cookies=" + cookies +
-                '}';
     }
 }

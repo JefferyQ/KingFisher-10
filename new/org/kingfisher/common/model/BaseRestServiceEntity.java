@@ -5,6 +5,7 @@ package org.kingfisher.common.model;
 public class BaseRestServiceEntity {
     protected String id;
     protected String url;
+    protected String description;
 
     public BaseRestServiceEntity() {
     }
@@ -28,8 +29,7 @@ public class BaseRestServiceEntity {
     @Override
     public String toString() {
         return String.format(
-                "%s{id=%s, url=%s}",
-                this.getClass().getName(),
+                "BaseRestServiceEntity{id=%s, url=%s}",
                 this.id,
                 this.url
         );

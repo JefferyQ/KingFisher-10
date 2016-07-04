@@ -14,8 +14,14 @@ public final class RestHandlerHelper {
     public static final String ENTITY_BODY_ENTITY_TYPE = "entity";
     public static final String RESULT_BODY_ENTITY_TYPE = "result";
 
-    public static String clearUrl(final String baseUrl, final String clearUrl) {
-        return StringUtils.remove(baseUrl, clearUrl);
+    public static final String VALIDATE_URL = "/validate";
+
+    public static String clearEndOfUrl(final String baseUrl, final String clearUrl) {
+        return StringUtils.removeEnd(baseUrl, clearUrl);
+    }
+
+    public static String clearStartOfUrl(final String baseUrl, final String clearUrl) {
+        return StringUtils.removeStart(baseUrl, clearUrl);
     }
 
     public static boolean validateUrl(final String url) {
