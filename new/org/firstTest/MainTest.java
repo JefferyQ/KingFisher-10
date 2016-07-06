@@ -21,8 +21,10 @@ public class MainTest {
     }
 
     public static void main(String[] args) throws Exception {
-        File file = new File("C:\\Users\\tkalenko\\Desktop\\testXml.xml");
-        System.out.println(new RestDomExtractor().extract(file));
+        // TODO: 06.07.16 протестировать полностью нового загрузчика
+        File file = new File("C:\\test\\test.xml");
+        System.out.println(new RestDomExtractor().extract(file, MainTest.class.getClassLoader()));
+
 
 
 //        RestHandler<String> restHandler = new RestHandler<>();

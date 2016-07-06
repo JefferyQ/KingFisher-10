@@ -8,5 +8,5 @@ import java.util.Collection;
 
 // TODO: 06.07.2016 добавить полное описание
 public interface RestExtractInterface {
-    Collection<BaseRestServiceEntity> extract(final File xml) throws RestExtractorException;
+    Collection<BaseRestServiceEntity> extract(final File xml, final ClassLoader classLoader) throws RestExtractorException;
 }
