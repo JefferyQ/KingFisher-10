@@ -1,10 +1,12 @@
 package org.firstTest;
 
+import org.kingfisher.common.RestDomExtractor;
 import org.kingfisher.common.RestHandler;
 import org.kingfisher.common.intf.BodyHandlerInterface;
 import org.kingfisher.common.intf.RestServiceOperationHandler;
 import org.kingfisher.common.model.*;
 
+import java.io.File;
 import java.util.*;
 
 /**
@@ -18,25 +20,29 @@ public class MainTest {
         RestMessageContext<String> context;
     }
 
-    public static void main(String[] args) throws RestHandlerException {
-        RestHandler<String> restHandler = new RestHandler<>();
-        restHandler.registerService(createRestService());
-        restHandler.registerOperation(createRestServiceOperation1());
-        restHandler.registerOperation(createRestServiceOperation2());
-        restHandler.registerOperation(createRestServiceOperation3());
-        restHandler.registerOperation(createRestServiceOperation4());
-        restHandler.registerOperation(createRestServiceOperation5());
+    public static void main(String[] args) throws Exception {
+        File file = new File("C:\\Users\\tkalenko\\Desktop\\testXml.xml");
+        System.out.println(new RestDomExtractor().extract(file));
 
-        for (Req req : createReqs()) {
-            System.out.println("--------------------------------");
-            try {
-                RestMessageContext<String> response = restHandler.handle(req.path, req.method, req.context);
-                System.out.println(String.format("path=%s method=%s req=%s res=%s", req.path, req.method, req.context, response.getBody()));
-            } catch (Exception e) {
-                System.err.println("error = " + e.getMessage());
-            }
-            System.out.println("********************************");
-        }
+
+//        RestHandler<String> restHandler = new RestHandler<>();
+//        restHandler.registerService(createRestService());
+//        restHandler.registerOperation(createRestServiceOperation1());
+//        restHandler.registerOperation(createRestServiceOperation2());
+//        restHandler.registerOperation(createRestServiceOperation3());
+//        restHandler.registerOperation(createRestServiceOperation4());
+//        restHandler.registerOperation(createRestServiceOperation5());
+//
+//        for (Req req : createReqs()) {
+//            System.out.println("--------------------------------");
+//            try {
+//                RestMessageContext<String> response = restHandler.handle(req.path, req.method, req.context);
+//                System.out.println(String.format("path=%s method=%s req=%s res=%s", req.path, req.method, req.context, response.getBody()));
+//            } catch (Exception e) {
+//                System.err.println("error = " + e.getMessage());
+//            }
+//            System.out.println("********************************");
+//        }
     }
 
     private static Req[] createReqs() {

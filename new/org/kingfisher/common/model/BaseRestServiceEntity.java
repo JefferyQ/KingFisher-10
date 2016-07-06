@@ -26,6 +26,14 @@ public class BaseRestServiceEntity {
         this.url = url;
     }
 
+    public String getDescription() {
+        return this.description;
+    }
+
+    public void setDescription(final String description) {
+        this.description = description;
+    }
+
     @Override
     public String toString() {
         return String.format(

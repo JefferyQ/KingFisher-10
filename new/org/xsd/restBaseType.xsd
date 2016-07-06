@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema
+        targetNamespace="http://java.kingfisher.org/baseTypes"
+        xmlns="http://www.w3.org/2001/XMLSchema"
+        xmlns:tns="http://java.kingfisher.org/baseTypes">
+
+    <complexType name="rest-service-type">
+        <complexContent>
+            <extension base="tns:base-rest-type">
+                <sequence>
+                    <element name="body-handler" type="tns:not-empty-string" minOccurs="1" maxOccurs="1" />
+                    <element name="operation-handler" type="tns:not-empty-string" minOccurs="1" maxOccurs="1" />
+                    <element name="interceptors" type="tns:rest-service-interceptors-type" minOccurs="0" maxOccurs="1" />
+                </sequence>
+            </extension>
+        </complexContent>
+    </complexType>
+
+    <complexType name="rest-operation-type">
+        <complexContent>
+            <extension base="tns:base-rest-type">
+                <sequence>
+                    <element name="handler" type="tns:not-empty-string" minOccurs="1" maxOccurs="1" />
+                    <element name="validator" type="tns:not-empty-string" minOccurs="0" maxOccurs="1" />
+                    <choice minOccurs="0" maxOccurs="1">
+                        <sequence>
+                            <element name="parameters" type="tns:rest-operation-base-param-type" minOccurs="0" maxOccurs="1" />
+                            <element name="reslt" type="tns:rest-operation-base-param-type" minOccurs="0" maxOccurs="1" />
+                        </sequence>
+                        <sequence>
+                            <element name="entity" type="tns:rest-operation-base-param-type" minOccurs="1" maxOccurs="1" />
+                        </sequence>
+                    </choice>
+                </sequence>
+                <attribute name="serviceId" type="tns:not-empty-string" use="required"/>
+                <attribute name="method" type="tns:not-empty-string" use="required"/>
+                <attribute name="auth" type="boolean" default="true"/>
+            </extension>
+        </complexContent>
+    </complexType>
+
+    <complexType name="base-rest-type">
+        <sequence>
+            <element name="description" type="string"
+                     minOccurs="0" maxOccurs="1" />
+        </sequence>
+        <attribute name="id" type="tns:not-empty-string"
+                   use="required" />
+        <attribute name="url" type="tns:url-string" use="required" />
+    </complexType>
+
+    <complexType name="rest-service-interceptors-type">
+        <sequence>
+            <element name="interceptor" type="tns:not-empty-string"
+                     minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+    </complexType>
+
+    <complexType name="rest-operation-base-param-type">
+        <simpleContent>
+            <extension base="tns:not-empty-string">
+                <attribute name="required" type="boolean" default="true" />
+            </extension>
+        </simpleContent>
+    </complexType>
+
+    <simpleType name="url-string">
+        <restriction base="string">
+            <pattern value="(/[a-zA-Z0-9]+)+" />
+        </restriction>
+    </simpleType>
+
+    <simpleType name="not-empty-string">
+        <restriction base="string">
+            <minLength value="1" />
+        </restriction>
+    </simpleType>
+
+</schema>

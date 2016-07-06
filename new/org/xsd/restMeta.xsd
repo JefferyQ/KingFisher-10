@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema
+        targetNamespace="http://java.kingfisher.org/rest-meta"
+        xmlns="http://www.w3.org/2001/XMLSchema"
+        xmlns:tns="http://java.kingfisher.org/rest-meta"
+        xmlns:kft="http://java.kingfisher.org/baseTypes">
+
+    <import namespace="http://www.kingfisher.org/BaseTypes"
+            schemaLocation="file:///C:/Users/tkalenko/Desktop/new6.xsd" />
+
+    <element name="rest-meta">
+        <complexType>
+            <sequence>
+                <element name="rest-service" type="kft:rest-service-type"
+                         minOccurs="0" maxOccurs="unbounded" />
+                <element name="rest-operation" type="kft:rest-operation-type"
+                         minOccurs="0" maxOccurs="unbounded" />
+            </sequence>
+        </complexType>
+    </element>
+</schema>
