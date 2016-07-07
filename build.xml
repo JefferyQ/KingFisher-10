@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="King-Fisher" default="create-api">
+	<property name="java_encoding" value="UTF-8" />
+
+	<property name="build_dir" value="build" />
+	<property name="classes_dir" value="classes" />
+	<property name="src_dir" value="src" />
+	<property name="lib_dir" value="libs" />
+	
+	<property name="jar-name" value="king-fisher" />
+	<property name="jar-version" value="0.1.0" />
+	
+	<target name="create-api">
+		<antcall target="prepare-build-dir" />
+		<antcall target="compile" />
+		<antcall target="create-jar" />
+		<antcall target="remove-build" />
+	</target>
+	
+	<target name="create-jar">
+		<jar destfile="${jar-name}-${jar-version}.jar">
+			<fileset dir="${build_dir}/${classes_dir}">
+				<include name="**/*.class" />
+			</fileset>
+		</jar>
+	</target>
+	
+	<target name="compile">
+		<javac encoding="${java_encoding}" destdir="${build_dir}/${classes_dir}">
+			<src path="${src_dir}" />
+			<classpath>
+				<fileset dir="${lib_dir}">
+					<include name="*.jar" />
+				</fileset>
+			</classpath>
+		</javac>
+	</target>
+		
+	<target name="remove-build">
+		<delete dir="${build_dir}" />
+	</target>
+	
+	<target name="prepare-build-dir" >
+		<antcall target="remove-build" />
+		<mkdir dir="${build_dir}" />
+		<mkdir dir="${build_dir}/${classes_dir}" />
+	</target>
+	
+</project>
